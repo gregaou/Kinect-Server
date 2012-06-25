@@ -27,30 +27,36 @@ namespace KinectServer
             
         }
 
-        public void process()
+        public byte process()
         {
             string[] tmp;
 
-            tmp = str_query.Split(sep.ToCharArray(),StringSplitOptions.RemoveEmptyEntries);
+            MethodInfo mInfo;
+            Type objType;
+           
+            tmp = str_query.Split(sep.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
-            if (tmp.Length < 2) 
+            if (tmp.Length < 3)
                 throw new Exception("Wrong Query");
 
             classname = tmp[0];
             methodname = tmp[1];
 
-            args = new string[tmp.Length-2];
+            args = new string[tmp.Length - 2];
             for (int i = 2; i < tmp.Length; ++i)
             {
-                 args[i-2] = tmp[i];
+                args[i - 2] = tmp[i];
             }
 
-            
-            action = (KAction)Activator.CreateInstance(Type.GetType("K"+classname+"Action"));
-            MethodInfo mInfo = typeof(KAction).GetMethod(methodname);
+            Console.WriteLine("Point Control");
+                
+            objType = Type.GetType("KinectServer.K" + classname + "Action");
+            action = (KAction)Activator.CreateInstance(objType);
 
-            mInfo.Invoke(action,args);
+            mInfo = action.GetType().GetMethod(methodname);
 
+            return (byte)mInfo.Invoke(action, new object[] { args });
+                
             
         }
 

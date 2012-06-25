@@ -78,11 +78,15 @@ namespace KinectServer
                     string s = cp.getQuery();
                     System.Console.WriteLine("Chaine reçue : " + s);
 
-                    KServerPaquet sp = new KServerMessagePaquet(100, s);
+
+                    KQuery q = new KQuery(cp.getQuery());
+                    byte code = q.process();
+                    KServerPaquet sp = new KServerMessagePaquet(code,q.action.rData.Normalize(NormalizationForm.);
+                    //KServerPaquet sp = new KServerMessagePaquet(code, );
                     sp.send(client.GetStream());
                 }
                 catch (Exception e)
-                {
+                {   
                     System.Console.WriteLine(e.Message);
                     break;
                 }

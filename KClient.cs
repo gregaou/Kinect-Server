@@ -33,9 +33,9 @@ namespace KinectServer
 
         ~KClient()
         {
-            
             if (threadClient.IsAlive)
                 threadClient.Abort();
+  
         }
 
 
@@ -43,32 +43,13 @@ namespace KinectServer
         {
             server.delClient(this);
 
-                
             if (client.Connected)
                 client.Close();
+
         }
 
         private void clientComm()
         {
-            /*
-            NetworkStream ns = client.GetStream();
-            byte[] message = new byte[4096];
-            int bytesRead;
-
-            int nb_k = 0;
-
-            foreach (KinectSensor s in sensorList)
-            {
-                if(s.Status==KinectStatus.Connected)
-                    nb_k++;
-            }
-
-            if (nb_k == 0)
-            {
-                byte[] mess = StrToByteArray("No Kinect Ready Found");
-                ns.Write(mess, 0, mess.Length);
-            }
-            */
 
             while (Thread.CurrentThread.IsAlive)
             {
@@ -79,43 +60,23 @@ namespace KinectServer
                     System.Console.WriteLine("Chaine reçue : " + s);
 
 
-                    KQuery q = new KQuery(cp.getQuery());
+                    KQuery q = new KQuery(cp.getQuery(),client.GetStream());
                     byte code = q.process();
-                    KServerPaquet sp = new KServerMessagePaquet(code,q.action.rData.Normalize(NormalizationForm.);
-                    //KServerPaquet sp = new KServerMessagePaquet(code, );
+                    KServerPaquet sp = new KServerMessagePaquet(code, q.action.rData);
+                    sp.send(client.GetStream());
+                }
+                catch (KActionException e)
+                {
+                    Console.WriteLine(e.exceptionNumber);
+                    KServerPaquet sp = new KServerMessagePaquet(222, "SMURK");
                     sp.send(client.GetStream());
                 }
                 catch (Exception e)
-                {   
-                    System.Console.WriteLine(e.Message);
-                    break;
-                }
-
-                /*
-                bytesRead = 0;
-
-                try
                 {
-                    //blocks until a client sends a message
-                    bytesRead = ns.Read(message, 0, 4096);
-                }
-                catch
-                {
-                    //a socket error has occured
+                    System.Console.WriteLine("Erreur : " + Thread.CurrentThread.Name + " : " + e.Message);
                     break;
                 }
-
-                // The client has disconnected from the server
-                if (bytesRead == 0)
-                    break;
-
-
-
-                //message has successfully been received
-                ASCIIEncoding encoder = new ASCIIEncoding();
-                System.Diagnostics.Debug.WriteLine(encoder.GetString(message, 0, bytesRead));
-                ns.Write(BitConverter.GetBytes('k'), 0, 1);
-                */
+           
             }
 
             closeClient();

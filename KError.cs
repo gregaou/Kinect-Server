@@ -2,7 +2,14 @@
 {
     static class KError
     {
-        public const byte GetSensorCollectionError = 101;
-        public const byte StatusKinectSensorError = 102; 
+        
+        public static object[] WrongQuery =             { "199", "Wrong Query !"};
+        public static object[] WrongNumberArguments =   { "100", "Incorrect Number of Arguments!" };
+        public static object[] ArgumentOutOfRange =     { "101", "Argument Out Of Range" };
+        public static object[] InvalidOperation =       { "102", "Invalid Operation : Retry" };
+        public static object[] SensorMustRunning =      { "103", "Kinect Sensor Must Be Running" };
+
+
+
     }
 }

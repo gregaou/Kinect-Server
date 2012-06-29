@@ -2,9 +2,8 @@
 {
     static class KSuccess
     {
-        public const byte GetSensorCollectionSuccess = 1;
-
-        public const byte StatusKinectSensorSucess = 2; 
+        public const byte QueryOk = 1;
+        public const byte EventQueryOk = 200;
 
     }
 }

@@ -15,9 +15,10 @@ namespace KinectServer
             this.code = code;
             this.msg = KServerPaquet.StrToByteArray(msg);
 
-            setBodySize((uint)msg.Count());
-            byte[] size = BitConverter.GetBytes((UInt32)msg.Count());
+            setBodySize((uint)msg.Length);
+            byte[] size = BitConverter.GetBytes((UInt32)msg.Length);
             Array.Reverse(size);
+
             Buffer.BlockCopy(size, 0, data, 0, size.Length);
 
             build();
@@ -30,7 +31,7 @@ namespace KinectServer
 
         protected override void buildBody()
         {
-            Buffer.BlockCopy(msg, 0, data, (int)headerSize(), msg.Count());
+            Buffer.BlockCopy(msg, 0, data, (int)headerSize(), (int)bodySize());
         }
     }
 }

@@ -3,47 +3,109 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Kinect;
+using System.Net.Sockets;
+using System.Threading;
 
 namespace KinectServer
 {
     class KKinectSensorAction : KAction
     {
 
-        public KKinectSensorAction() : base()
+        public KKinectSensorAction(NetworkStream arg)
+            : base(arg)
         {
+            
         }
 
-        public byte Status(string[] args)
-        {
-            byte status;
-
-            if (args.Length != 1)
-                throw new Exception("Wrong args number !");
-
-            KinectSensor sensor;
-            int id = int.Parse(args[0]);
-
-            //if (id + 1 > sensors.Count)
-            //{
-            //    rData = "Bad Index";
-            //    return KError.StatusKinectSensorError;
-            //}
-
-
+        private void getKinectSensor(int id){
             try
             {
                 sensor = sensors[id];
+
             }
-            catch (ArgumentOutOfRangeException e)
+            catch (Exception e)
             {
-                rData = "Bad Index !";
-                return KError.StatusKinectSensorError;
+                throw new KActionException(KError.ArgumentOutOfRange);
             }
+        }
 
-            status = (byte)sensor.Status;
-            //rData = status.ToString(); 
+        private KinectSensor sensor;
 
-            return KSuccess.StatusKinectSensorSucess;
+        public byte getStatus(string[] args)
+        {
+            try
+            {
+                verifArgs(1, args);
+                getKinectSensor(int.Parse(args[0]));
+                byte status = (byte)sensor.Status;
+                rData = status.ToString();
+
+                Console.WriteLine(sensor.DeviceConnectionId);
+
+                return KSuccess.QueryOk;
+            }
+            catch (KActionException e)
+            {
+                rData = e.Message;
+                return e.exceptionNumber;
+            }      
+        }
+
+        public byte getElevationAngle(string[] args)
+        {
+            try
+            {
+                verifArgs(1, args);
+                getKinectSensor(int.Parse(args[0]));
+                try
+                {
+                    rData += sensor.ElevationAngle;
+                }
+                catch (InvalidOperationException e)
+                {
+                    throw new KActionException(KError.SensorMustRunning);
+                }
+
+                return KSuccess.QueryOk;
+            }
+            catch (KActionException e)
+            {
+                rData = e.Message;
+                return e.exceptionNumber;
+            }
+        }
+
+
+        public byte setElevationAngle(string[] args)
+        {
+            try
+            {
+                verifArgs(2, args);
+                getKinectSensor(int.Parse(args[0]));
+                rData = "";
+                try
+                {
+                    sensor.ElevationAngle = int.Parse(args[1]);
+                }
+                catch (InvalidOperationException e)
+                {
+                    if (!sensor.IsRunning)
+                        throw new KActionException(KError.SensorMustRunning);
+
+                    throw new KActionException(KError.InvalidOperation);
+                }
+                catch (ArgumentOutOfRangeException e)
+                {
+                    throw new KActionException(KError.ArgumentOutOfRange);
+                }
+
+                return KSuccess.QueryOk;
+            }
+            catch (KActionException e)
+            {
+                rData = e.Message;
+                return e.exceptionNumber;
+            }
         }
 
     }

@@ -30,6 +30,7 @@ namespace KinectServer
 
             /* id */
             data[8] = id();
+
         }
 
         public static byte[] StrToByteArray(string str)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Net.Sockets;
 
 namespace KinectServer
 {
@@ -13,6 +14,8 @@ namespace KinectServer
         
         private string str_query;
 
+        private NetworkStream ns;
+
         public string classname { get; private set; }
 
         public string methodname { get; private set; }
@@ -21,10 +24,10 @@ namespace KinectServer
 
         public KAction action { get; private set; }
 
-        public KQuery(string _str)
+        public KQuery(string _str, NetworkStream _ns)
         {
             str_query = _str;
-            
+            ns = _ns;
         }
 
         public byte process()
@@ -36,8 +39,8 @@ namespace KinectServer
            
             tmp = str_query.Split(sep.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
-            if (tmp.Length < 3)
-                throw new Exception("Wrong Query");
+            if (tmp.Length < 2)
+                throw new KActionException(KError.WrongQuery);
 
             classname = tmp[0];
             methodname = tmp[1];
@@ -47,18 +50,22 @@ namespace KinectServer
             {
                 args[i - 2] = tmp[i];
             }
-
-            Console.WriteLine("Point Control");
                 
             objType = Type.GetType("KinectServer.K" + classname + "Action");
-            action = (KAction)Activator.CreateInstance(objType);
-
+            try
+            {
+                action = (KAction)Activator.CreateInstance(objType, new object[] { ns });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
             mInfo = action.GetType().GetMethod(methodname);
+            
+
 
             return (byte)mInfo.Invoke(action, new object[] { args });
-                
-            
-        }
+    }
 
 
 

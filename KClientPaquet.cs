@@ -26,7 +26,6 @@ namespace KinectServer
         protected override void buildHeader()
         {
             readBuffer(data, 0, (int)headerSize());
-            System.Console.WriteLine("taille reçue : " + bodySize());
             setBodySize(bodySize());
         }
 
@@ -38,6 +37,7 @@ namespace KinectServer
 
         private void readBuffer(byte[] buffer, int start, int length)
         {
+            /*
             int r;
 
             if (!stream.CanRead)
@@ -50,6 +50,21 @@ namespace KinectServer
 
             if (r != length)
                 throw new Exception("Couldn't read all the paquet (" + r + "/" + length + " bytes read)");
+            /*/
+            int n = 0, r;
+
+            if (!stream.CanRead)
+                throw new Exception("The stream cannot read");
+
+            while (n < length)
+            {
+                r = stream.Read(buffer, start + n, length - n);
+                if (r == 0)
+                    throw new Exception("Connection lost");
+
+                n += r;
+            }
+            //*/
         }
 
         public string getQuery()

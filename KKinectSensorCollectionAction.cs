@@ -33,12 +33,9 @@ namespace KinectServer
         public byte StatusChanged(string[] args)
         {
             try
-            {
-                
+            {        
                 verifArgs(0, args);
-                Console.WriteLine("kikoo1");
                 sensors.StatusChanged += KinectSensorsStatusChanged;
-                Console.WriteLine("kikoo2");
             }
             catch (KActionException e)
             {
@@ -52,9 +49,9 @@ namespace KinectServer
 
         void KinectSensorsStatusChanged(object sender, StatusChangedEventArgs e)
         {
+            /*
             KinectSensor k;
             KinectStatus s;
-            Console.WriteLine("kikoo22");
             k = e.Sensor;
             s = e.Status;
             int id=-1;
@@ -67,12 +64,18 @@ namespace KinectServer
                     break;
                 }
             }
+            */
 
-
-            KServerPaquet sp = new KServerMessagePaquet(200, "1||1");
-            sp.send(ns);
-
+            try
+            {
+                KServerPaquet sp = new KServerMessagePaquet(200, "1||" + (byte)e.Status);
+                sp.send(ns);
+            }
+            catch (Exception exc)
+            {
+                System.Console.WriteLine("event statusChanged disconnected : " + exc.Message);
+                sensors.StatusChanged -= KinectSensorsStatusChanged;
+            }
         } 
-
     }
 }

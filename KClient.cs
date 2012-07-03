@@ -57,7 +57,7 @@ namespace KinectServer
                 {
                     KClientPaquet cp = new KClientPaquet(client.GetStream());
                     string s = cp.getQuery();
-                    System.Console.WriteLine("Chaine reçue : " + s);
+                    //System.Console.WriteLine("Query : " + s);
 
 
                     KQuery q = new KQuery(cp.getQuery(),client.GetStream());

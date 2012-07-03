@@ -9,7 +9,7 @@
         public static object[] InvalidOperation =       { "102", "Invalid Operation : Retry" };
         public static object[] SensorMustRunning =      { "103", "Kinect Sensor Must Be Running" };
 
-
+        public static object[] AlreadyInUse =           { "104", "Kinect Used By Anoter Process" };
 
     }
 }

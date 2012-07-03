@@ -62,8 +62,6 @@ namespace KinectServer
             }
             mInfo = action.GetType().GetMethod(methodname);
             
-
-
             return (byte)mInfo.Invoke(action, new object[] { args });
     }
 

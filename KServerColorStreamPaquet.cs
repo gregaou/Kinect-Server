@@ -39,17 +39,10 @@ namespace KinectServer
             //encoder.Save(img);
 
             /* Sets the size of the paquet */
-            setBodySize((uint)(jpgImage.Length+2));
-            byte[] size = BitConverter.GetBytes((UInt32)(jpgImage.Length+2));
-            
+            setBodySize((uint)(jpgImage.Length+1));
+            byte[] size = BitConverter.GetBytes((UInt32)(jpgImage.Length+1));
             
             Array.Reverse(size);
-
-            Console.WriteLine("Size : "+(UInt32)(jpgImage.Length + 2));
-            Console.WriteLine("Size (bytes) : " +size[0] + " " + size[1] + " " + size[2] + " " + size[3]);
-            Console.WriteLine("ID Sensor : " +idSensor);
-            Console.WriteLine("Format : "+ (byte)format);
-            Console.WriteLine("Byte 10 : " + (byte)((idSensor << 4) | (byte)format));
             Buffer.BlockCopy(size, 0, data, 0, size.Length);
 
             /* Builds the paquet */
@@ -65,10 +58,8 @@ namespace KinectServer
         {
             /* Copies the data in the paquet buffer */
             byte[] toWrite = jpgImage.ToArray();
-            data[headerSize()] = (byte)(idSensor);
-            data[headerSize() + 1] = (byte)(format);
-            Buffer.BlockCopy(toWrite, 0, data, (int)headerSize()+2, toWrite.Length);
-            Console.WriteLine("data[9] : " + data[9] + "data[10] : " + data[10]);
+            data[headerSize()] = (byte)((byte)(idSensor) << 4 |(byte)(format));
+            Buffer.BlockCopy(toWrite, 0, data, (int)headerSize()+1, toWrite.Length);
         }
     }
 }

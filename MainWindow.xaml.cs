@@ -72,7 +72,7 @@ namespace KinectServer
         {
             //*
             KinectTcp = new KTcp();
-            /*/
+            
             drawingVisual = new DrawingVisual();
 
             foreach (KinectSensor potentialSensor in KinectSensor.KinectSensors)

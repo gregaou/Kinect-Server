@@ -45,7 +45,7 @@ namespace KinectServer
         {
             if (!stream.CanWrite)
                 throw new Exception("the stream cannot write");
-
+                
             stream.Write(data, 0, data.Length);
         }
     }

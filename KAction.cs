@@ -45,42 +45,6 @@ namespace KinectServer
             verifArgs(tab, args);
         }
 
-        protected byte getQuery(Type type, object obj, string member, string[] args, int[] n)
-        {
-            try
-            {
-                verifArgs(n, args);
-
-                try
-                {
-                    PropertyInfo property = type.GetProperty(member);
-                    object value = property.GetValue(obj, null);
-                    rData = value.ToString();
-                    return KSuccess.QueryOk;
-                }
-                catch (InvalidOperationException e)
-                {
-                    Console.WriteLine("Invalid operation");
-                    throw new KActionException(KError.SensorMustRunning);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("other exception");
-                    throw new KActionException(new object[] { "142", "getQuery" });
-                }
-            }
-            catch (KActionException e)
-            {
-                rData = e.Message;
-                return e.exceptionNumber;
-            }
-        }
-
-        protected byte getQuery(Type type, object obj, string member, string[] args, int n)
-        {
-            return getQuery(type, obj, member, args, new int[] { n });
-        }
-
         //public byte exec();
     }
 }

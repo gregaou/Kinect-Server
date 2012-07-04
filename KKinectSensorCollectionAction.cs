@@ -33,7 +33,7 @@ namespace KinectServer
         public byte StatusChanged(string[] args)
         {
             try
-            {        
+            {
                 verifArgs(0, args);
                 sensors.StatusChanged += KinectSensorsStatusChanged;
             }
@@ -42,30 +42,17 @@ namespace KinectServer
                 rData = e.Message;
                 return e.exceptionNumber;
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
 
             rData = "Succefull !";
             return KSuccess.QueryOk;
         }
 
-        void KinectSensorsStatusChanged(object sender, StatusChangedEventArgs e)
+        public void KinectSensorsStatusChanged(object sender, StatusChangedEventArgs e)
         {
-            /*
-            KinectSensor k;
-            KinectStatus s;
-            k = e.Sensor;
-            s = e.Status;
-            int id=-1;
-
-            for (int i = 0; i < KinectSensor.KinectSensors.Count; i++)
-            {
-                if (KinectSensor.KinectSensors[i].Equals(k))
-                {
-                    id = (byte)i;
-                    break;
-                }
-            }
-            */
-
             try
             {
                 KServerPaquet sp = new KServerMessagePaquet(200, "1||" + (byte)e.Status);

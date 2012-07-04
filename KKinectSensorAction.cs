@@ -8,6 +8,9 @@ using System.Threading;
 using System.IO;
 using System.Reflection;
 using System.Net;
+using System.Drawing;
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
 
 namespace KinectServer
 {
@@ -24,7 +27,6 @@ namespace KinectServer
             try
             {
                 sensor = sensors[id];
-
             }
             catch (Exception e)
             {
@@ -33,37 +35,6 @@ namespace KinectServer
         }
 
         private KinectSensor sensor;
-        /*
-        protected byte getQuery(string member, string[] args, int[] n)
-        {
-            try
-            {
-                verifArgs(n, args);
-                getKinectSensor(int.Parse(args[0]));
-                return getQuery(sensor.GetType(), sensor, member, args, n);
-            }
-            catch (KActionException e)
-            {
-                rData = e.Message;
-                return e.exceptionNumber;
-            }
-        }
-
-        protected byte getQuery(string member, string[] args, int n)
-        {
-            byte ret = getQuery(member, args, new int[] {n});
-            KActionException op = new KActionException(KError.InvalidOperation);
-            KActionException run = new KActionException(KError.SensorMustRunning);
-
-            if (ret == op.exceptionNumber)
-            {
-                rData = run.Message;
-                return run.exceptionNumber;
-            }
-
-            return ret;
-        }
-        */
 
         public byte getDeviceConnectionId(string[] args)
         {
@@ -92,9 +63,6 @@ namespace KinectServer
 
         public byte getElevationAngle(string[] args)
         {
-            /*
-            return getQuery("ElevationAngle", args, 1);
-            /*/
             try
             {
                 verifArgs(1, args);
@@ -115,7 +83,6 @@ namespace KinectServer
                 rData = e.Message;
                 return e.exceptionNumber;
             }
-            //*/
         }
 
         public byte setElevationAngle(string[] args)
@@ -203,16 +170,6 @@ namespace KinectServer
 
         public byte getStatus(string[] args)
         {
-            /*
-            byte ret = getQuery("Status", args, 1);
-
-            KinectStatus status = (KinectStatus)Enum.Parse(typeof(KinectStatus), rData);
-            rData = ((byte)status).ToString();
-
-            Console.WriteLine(rData);
-
-            return ret;
-            /*/
             try
             {
                 verifArgs(1, args);
@@ -235,7 +192,6 @@ namespace KinectServer
                 rData = e.Message;
                 return e.exceptionNumber;
             }
-            //*/
         }
 
         public byte getUniqueKinectId(string[] args)
@@ -477,9 +433,8 @@ namespace KinectServer
 
                 try
                 {
-                    Console.WriteLine("start");
                     sensor.Start();
-                    Console.WriteLine("Start 2");
+                    sensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
                 }
                 catch (IOException e)
                 {
@@ -511,6 +466,68 @@ namespace KinectServer
                 rData = e.Message;
                 return e.exceptionNumber;
             }
+        }
+
+        public byte ColorFrameReady(string[] args)
+        {
+
+            try
+            {
+                verifArgs(1, args);
+                getKinectSensor(int.Parse(args[0]));
+                sensor.ColorFrameReady += KinectSensorColorFrameReady;
+            }
+            catch (KActionException e)
+            {
+                rData = e.Message;
+                return e.exceptionNumber;
+            }
+
+            rData = "Succefull !";
+            return KSuccess.QueryOk;
+        }
+
+        public void KinectSensorColorFrameReady(Object Sender, ColorImageFrameReadyEventArgs e)
+        {
+
+
+            try
+            {
+                using (ColorImageFrame imageFrame = e.OpenColorImageFrame())
+                {
+                    byte[] pxlData = new byte[imageFrame.PixelDataLength];
+                    imageFrame.CopyPixelDataTo(pxlData);
+
+                    BitmapFrame image = BitmapFrame.Create(BitmapSource.Create(
+                        imageFrame.Width,
+                        imageFrame.Height,
+                        96,
+                        96,
+                        PixelFormats.Bgr32,
+                        BitmapPalettes.Halftone256Transparent,
+                        pxlData,
+                        imageFrame.Width*4));
+
+
+                    KServerPaquet sp = new KServerColorStreamPaquet(image, imageFrame.Format, getIdSensor(sensor));
+                    sp.send(ns);
+                }
+            }
+            catch (Exception exc)
+            {
+                System.Console.WriteLine("event ColorFrameReady disconnected : " + exc.Message);
+                sensor.ColorFrameReady -= KinectSensorColorFrameReady;
+            }
+        }
+
+        private int getIdSensor(KinectSensor s)
+        {
+            for (int i = 0; i < sensors.Count; i++)
+            {
+                if (s.Equals(sensors[i]))
+                    return i;
+            }
+            return -1;
         }
     }
 }

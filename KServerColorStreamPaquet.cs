@@ -13,32 +13,43 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Kinect;
 
 namespace KinectServer
 {
     class KServerColorStreamPaquet : KServerStreamPaquet
     {
-        private const byte StreamId = 1;
-        private byte[] pixels;
-        private int stride;
+        private const byte StreamId = 201;
         private MemoryStream jpgImage;
+        private ColorImageFormat format;
+        private int idSensor;
 
-        public KServerColorStreamPaquet(byte[] pixels, int stride)
+        public KServerColorStreamPaquet(BitmapFrame pixels, ColorImageFormat format, int idSensor)
         {
-            this.pixels = pixels;
-            this.stride = stride;
+            this.format = format;
+            this.idSensor = idSensor;
 
-            jpgImage = new MemoryStream();
+            Stream img = new FileStream("test.jpg", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
             JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            jpgImage = new MemoryStream();
 
             /* Encodes the frame into JPG format */
-            encoder.Frames.Add(BitmapFrame.Create(new MemoryStream(pixels)));
+            encoder.Frames.Add(pixels);
             encoder.Save(jpgImage);
+            //encoder.Save(img);
 
             /* Sets the size of the paquet */
-            setBodySize((uint)jpgImage.Length);
-            byte[] size = BitConverter.GetBytes((UInt32)jpgImage.Length);
+            setBodySize((uint)(jpgImage.Length+2));
+            byte[] size = BitConverter.GetBytes((UInt32)(jpgImage.Length+2));
+            
+            
             Array.Reverse(size);
+
+            Console.WriteLine("Size : "+(UInt32)(jpgImage.Length + 2));
+            Console.WriteLine("Size (bytes) : " +size[0] + " " + size[1] + " " + size[2] + " " + size[3]);
+            Console.WriteLine("ID Sensor : " +idSensor);
+            Console.WriteLine("Format : "+ (byte)format);
+            Console.WriteLine("Byte 10 : " + (byte)((idSensor << 4) | (byte)format));
             Buffer.BlockCopy(size, 0, data, 0, size.Length);
 
             /* Builds the paquet */
@@ -54,7 +65,10 @@ namespace KinectServer
         {
             /* Copies the data in the paquet buffer */
             byte[] toWrite = jpgImage.ToArray();
-            Buffer.BlockCopy(toWrite, 0, data, (int)headerSize(), toWrite.Length);
+            data[headerSize()] = (byte)(idSensor);
+            data[headerSize() + 1] = (byte)(format);
+            Buffer.BlockCopy(toWrite, 0, data, (int)headerSize()+2, toWrite.Length);
+            Console.WriteLine("data[9] : " + data[9] + "data[10] : " + data[10]);
         }
     }
 }

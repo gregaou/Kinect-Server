@@ -34,7 +34,29 @@ namespace KinectServer
             }
         }
 
+        private Thread audioThread;
+        private Stream audioStream;
+        private bool isReading = false;
         private KinectSensor sensor;
+        /// <summary>
+        /// Number of milliseconds between each read of audio data from the stream.
+        /// </summary>
+        private const int AudioPollingInterval = 50;
+
+        /// <summary>
+        /// Number of samples captured from Kinect audio stream each millisecond.
+        /// </summary>
+        private const int SamplesPerMillisecond = 16;
+
+        /// <summary>
+        /// Number of bytes in each Kinect audio stream sample.
+        /// </summary>
+        private const int BytesPerSample = 2;
+
+        /// <summary>
+        /// Buffer used to hold audio data read from audio stream.
+        /// </summary>
+        private readonly byte[] audioBuffer = new byte[AudioPollingInterval * SamplesPerMillisecond * BytesPerSample];
 
         public byte getDeviceConnectionId(string[] args)
         {
@@ -495,21 +517,7 @@ namespace KinectServer
             {
                 using (ColorImageFrame imageFrame = e.OpenColorImageFrame())
                 {
-                    byte[] pxlData = new byte[imageFrame.PixelDataLength];
-                    imageFrame.CopyPixelDataTo(pxlData);
-
-                    BitmapFrame image = BitmapFrame.Create(BitmapSource.Create(
-                        imageFrame.Width,
-                        imageFrame.Height,
-                        96,
-                        96,
-                        PixelFormats.Bgr32,
-                        BitmapPalettes.Halftone256Transparent,
-                        pxlData,
-                        imageFrame.Width*4));
-
-
-                    KServerPaquet sp = new KServerColorStreamPaquet(image, imageFrame.Format, getIdSensor(sensor));
+                    KServerPaquet sp = new KServerColorStreamPaquet(imageFrame, getIdSensor(sensor));
                     sp.send(ns);
                 }
             }
@@ -517,6 +525,80 @@ namespace KinectServer
             {
                 System.Console.WriteLine("event ColorFrameReady disconnected : " + exc.Message);
                 sensor.ColorFrameReady -= KinectSensorColorFrameReady;
+            }
+        }
+
+        public byte DepthFrameReady(string[] args)
+        {
+            try
+            {
+                verifArgs(1, args);
+                getKinectSensor(int.Parse(args[0]));
+                sensor.DepthFrameReady += KinectSensorDepthFrameReady;
+            }
+            catch (KActionException e)
+            {
+                rData = e.Message;
+                return e.exceptionNumber;
+            }
+
+            rData = "Succefull !";
+            return KSuccess.QueryOk;
+        }
+
+        public void KinectSensorDepthFrameReady(Object Sender, DepthImageFrameReadyEventArgs e)
+        {
+            try
+            {
+                using (DepthImageFrame depthFrame = e.OpenDepthImageFrame())
+                {
+                    KServerPaquet sp = new KServerDepthStreamPaquet(depthFrame, getIdSensor(sensor));
+                    sp.send(ns);
+                }
+            }
+            catch (Exception exc)
+            {
+                System.Console.WriteLine("event DepthFrameReady disconnected : " + exc.Message);
+                sensor.DepthFrameReady -= KinectSensorDepthFrameReady;
+            }
+        }
+
+        public byte AudioDataReady(string[] args)
+        {
+            try
+            {
+                verifArgs(1, args);
+                getKinectSensor(int.Parse(args[0]));
+                audioStream = sensor.AudioSource.Start();
+                isReading = true;
+                audioThread = new Thread(AudioReadingThread);
+                audioThread.Start();
+            }
+            catch (KActionException e)
+            {
+                rData = e.Message;
+                return e.exceptionNumber;
+            }
+
+            rData = "Succefull !";
+            return KSuccess.QueryOk;
+        }
+
+        private void AudioReadingThread()
+        {
+            while (isReading)
+            {
+                int readCount = audioStream.Read(audioBuffer, 0, audioBuffer.Length);
+                try
+                {
+                    KServerPaquet sp = new KServerAudioStreamPaquet(audioBuffer, getIdSensor(sensor));
+                    sp.send(ns);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    isReading = false;
+                }
             }
         }
 

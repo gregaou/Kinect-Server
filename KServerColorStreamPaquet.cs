@@ -21,26 +21,37 @@ namespace KinectServer
     {
         private const byte StreamId = 201;
         private MemoryStream jpgImage;
-        private ColorImageFormat format;
+        private ColorImageFrame imageFrame;
         private int idSensor;
 
-        public KServerColorStreamPaquet(BitmapFrame pixels, ColorImageFormat format, int idSensor)
+        public KServerColorStreamPaquet(ColorImageFrame _imageFrame, int _idSensor)
         {
-            this.format = format;
-            this.idSensor = idSensor;
+            idSensor = _idSensor;
+            imageFrame = _imageFrame;
 
-            Stream img = new FileStream("test.jpg", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+            byte[] pxlData = new byte[imageFrame.PixelDataLength];
+            imageFrame.CopyPixelDataTo(pxlData);
+
+            BitmapFrame image = BitmapFrame.Create(BitmapSource.Create(
+                imageFrame.Width,
+                imageFrame.Height,
+                96,
+                96,
+                PixelFormats.Bgr32,
+                BitmapPalettes.Halftone256Transparent,
+                pxlData,
+                imageFrame.Width * 4));
+
             JpegBitmapEncoder encoder = new JpegBitmapEncoder();
             jpgImage = new MemoryStream();
 
             /* Encodes the frame into JPG format */
-            encoder.Frames.Add(pixels);
+            encoder.Frames.Add(image);
             encoder.Save(jpgImage);
-            //encoder.Save(img);
 
             /* Sets the size of the paquet */
-            setBodySize((uint)(jpgImage.Length+1));
-            byte[] size = BitConverter.GetBytes((UInt32)(jpgImage.Length+1));
+            setBodySize((uint)(jpgImage.Length+5));
+            byte[] size = BitConverter.GetBytes((UInt32)(jpgImage.Length+5));
             
             Array.Reverse(size);
             Buffer.BlockCopy(size, 0, data, 0, size.Length);
@@ -58,8 +69,11 @@ namespace KinectServer
         {
             /* Copies the data in the paquet buffer */
             byte[] toWrite = jpgImage.ToArray();
-            data[headerSize()] = (byte)((byte)(idSensor) << 4 |(byte)(format));
-            Buffer.BlockCopy(toWrite, 0, data, (int)headerSize()+1, toWrite.Length);
+            byte[] frameNumber = BitConverter.GetBytes((UInt32)IPAddress.HostToNetworkOrder(imageFrame.FrameNumber));
+
+            data[headerSize()] = (byte)((byte)(idSensor) << 4 |(byte)(imageFrame.Format));
+            Buffer.BlockCopy(frameNumber,0,data,(int)headerSize()+1,frameNumber.Length);
+            Buffer.BlockCopy(toWrite, 0, data, (int)headerSize()+frameNumber.Length+1, toWrite.Length);
         }
     }
 }

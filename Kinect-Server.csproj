@@ -81,12 +81,16 @@
     <Compile Include="KActionException.cs" />
     <Compile Include="KClient.cs" />
     <Compile Include="KClientPaquet.cs" />
+    <Compile Include="KColorImageStreamAction.cs" />
     <Compile Include="KError.cs" />
+    <Compile Include="KKinectAudioSourceAction.cs" />
     <Compile Include="KKinectSensorAction.cs" />
     <Compile Include="KKinectSensorCollectionAction.cs" />
     <Compile Include="KPaquet.cs" />
     <Compile Include="KQuery.cs" />
+    <Compile Include="KServerAudioStreamPaquet.cs" />
     <Compile Include="KServerColorStreamPaquet.cs" />
+    <Compile Include="KServerDepthStreamPaquet.cs" />
     <Compile Include="KServerMessagePaquet.cs" />
     <Compile Include="KServerPaquet.cs" />
     <Compile Include="KServerSkeletonStreamPaquet.cs" />

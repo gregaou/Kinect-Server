@@ -52,6 +52,8 @@ namespace KinectServer
             }
                 
             objType = Type.GetType("KinectServer.K" + classname + "Action");
+
+            Console.WriteLine("KinectServer.K" + classname + "Action");
             try
             {
                 action = (KAction)Activator.CreateInstance(objType, new object[] { ns });
@@ -61,6 +63,7 @@ namespace KinectServer
                 Console.WriteLine(e.Message);
             }
             mInfo = action.GetType().GetMethod(methodname);
+            Console.WriteLine("KinectServer.K" + classname + "Action");
             
             return (byte)mInfo.Invoke(action, new object[] { args });
     }

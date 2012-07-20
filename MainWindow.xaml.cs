@@ -15,6 +15,7 @@ using Microsoft.Kinect;
 
 namespace KinectServer
 {
+    #pragma warning disable 169, 414
     public partial class MainWindow : Window
     {
         private KinectSensor sensor;

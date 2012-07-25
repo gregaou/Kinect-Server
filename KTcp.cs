@@ -40,14 +40,24 @@ namespace KinectServer
 
         private void waitClient() 
         {
-            Start();
 
+            try
+            {
+                Start();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                System.Environment.Exit(1);
+            }
             while (Thread.CurrentThread.IsAlive)
             {
                 KClient newKClient = new KClient(this, AcceptTcpClient(), sensorList);
                 addClient(newKClient);
-                System.Console.WriteLine(clients.Count);
+                Console.WriteLine(clients.Count);
             }
+
+            
 
             Stop();
         }

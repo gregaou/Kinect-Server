@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.IO;
 using System.Net;
+using System.Text;
 
 namespace KinectServer
 {
@@ -268,32 +269,6 @@ namespace KinectServer
                       colorImageFormat,
                       colorCoordinates);
 
-                Console.WriteLine("fin fonction");
-
-                byte[] tab = new byte[4*tabSize*2];
-                byte[] tmp = new byte[4];
-
-                for (int i = 0; i < 2; i++)
-                {
-                    ColorImagePoint p = colorCoordinates[i];
-                    int x = IPAddress.HostToNetworkOrder(p.X);
-                    int y = IPAddress.HostToNetworkOrder(p.Y);
-
-                    Console.WriteLine("(" + p.X + ", " + p.Y + ") "); 
-
-                    tmp = BitConverter.GetBytes(p.X);
-                    Buffer.BlockCopy(tmp, 0, tab, 4*i*2, 4);
-                    tmp = BitConverter.GetBytes(p.Y);
-                    Buffer.BlockCopy(tmp, 0, tab, 4*(i*2+1), 4);
-                }
-
-                Console.WriteLine("Fin boucle");
-
-                rData = KClient.ByteArrayToStr(tab);
-
-                Console.WriteLine("Fin conversion");
-
-                /*
                 StringBuilder sb = new StringBuilder();
 
                 for (int i=0; i<tabSize; i++)
@@ -307,13 +282,7 @@ namespace KinectServer
                 }
 
                 rData = sb.ToString();
-                string[] tab = rData.Split(new string[] { "||" }, StringSplitOptions.RemoveEmptyEntries);
-                Console.WriteLine("fin boucle : " + tab.Length);
-                Console.WriteLine(rData.Length);
-                Console.WriteLine(colorCoordinates[0].X);
-                Console.WriteLine(colorCoordinates[tabSize - 1].Y);
-                */
-
+                
                 return KSuccess.QueryOk;
             }
             catch (KActionException e)

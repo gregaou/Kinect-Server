@@ -9,7 +9,7 @@ using System.Resources;
 [assembly: AssemblyTitle("Kinect Server")]
 [assembly: AssemblyDescription("A simple Kinect Server to use Kinect everywhere")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("AMU LIF")]
 [assembly: AssemblyProduct("Kinect Server")]
 [assembly: AssemblyCopyright("Copyright ©  2012")]
 [assembly: AssemblyTrademark("")]

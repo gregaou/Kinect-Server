@@ -31,7 +31,7 @@
     <PublisherName>AMU LIF</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>index.html</WebPage>
-    <ApplicationRevision>14</ApplicationRevision>
+    <ApplicationRevision>15</ApplicationRevision>
     <ApplicationVersion>0.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -93,6 +93,7 @@
     <Compile Include="KClient.cs" />
     <Compile Include="KClientPaquet.cs" />
     <Compile Include="KColorImageStreamAction.cs" />
+    <Compile Include="KDepthImageStreamAction.cs" />
     <Compile Include="KError.cs" />
     <Compile Include="KKinectAudioSourceAction.cs" />
     <Compile Include="KKinectSensorAction.cs" />

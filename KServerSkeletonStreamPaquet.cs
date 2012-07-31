@@ -1,10 +1,6 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
-using System.Windows;
-using System.Collections.Generic;
-using System.Text;
-using System.Net;
-using System.Net.Sockets;
 using Microsoft.Kinect;
 
 namespace KinectServer

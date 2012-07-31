@@ -1,18 +1,8 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
-using System.Text;
-using System.Net.Sockets;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Microsoft.Kinect;
 
 namespace KinectServer
@@ -32,22 +22,14 @@ namespace KinectServer
             byte[] pxlData = new byte[imageFrame.PixelDataLength];
             imageFrame.CopyPixelDataTo(pxlData);
 
-            BitmapFrame image = BitmapFrame.Create(BitmapSource.Create(
-                imageFrame.Width,
-                imageFrame.Height,
-                96,
-                96,
-                PixelFormats.Bgr32,
-                BitmapPalettes.Halftone256Transparent,
-                pxlData,
-                imageFrame.Width * 4));
-
-            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
             jpgImage = new MemoryStream();
-
-            /* Encodes the frame into JPG format */
-            encoder.Frames.Add(image);
-            encoder.Save(jpgImage);
+            unsafe {
+               fixed (byte* ptr = pxlData) {
+                  using (Bitmap image = new Bitmap(imageFrame.Width, imageFrame.Height, imageFrame.Width*4, PixelFormat.Format32bppArgb, new IntPtr(ptr))) {
+                     image.Save(jpgImage, ImageFormat.Jpeg);
+                  }
+               }
+            }
 
             /* Sets the size of the paquet */
             setBodySize((uint)(jpgImage.Length+5));

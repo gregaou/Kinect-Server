@@ -1,0 +1,6 @@
+﻿namespace KinectServer
+{
+    class KMessage
+    {
+    }
+}

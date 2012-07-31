@@ -141,7 +141,6 @@ namespace KinectServer
         {
             try
             {
-                Console.WriteLine("enable" + args);
                 verifArgs(2, args);
                 getKinectSensor(int.Parse(args[0]));
 

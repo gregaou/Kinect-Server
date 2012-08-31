@@ -73,7 +73,7 @@ namespace KinectServer
                 }
                 catch (Exception e)
                 {
-                    System.Console.WriteLine("Erreur : " + Thread.CurrentThread.Name + " : " + e.Message);
+                    System.Console.WriteLine("Error : " + Thread.CurrentThread.Name + " : " + e.Message);
                     break;
                 }
            

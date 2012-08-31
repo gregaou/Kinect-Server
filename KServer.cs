@@ -35,7 +35,7 @@ namespace KinectServer
                 Console.WriteLine(e.Message);
             }
 
-            return string.Format("{0} , Version {1}, {2}", Application.ProductName, version, time.ToLocalTime());
+            return string.Format("{0} : Version {1}\n{0} : Last Update : {2} UTC", Application.ProductName, version, time.ToUniversalTime());
 
         }
 
